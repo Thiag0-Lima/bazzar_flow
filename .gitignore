@@ -1,0 +1,30 @@
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Bancos de dados e backups (dados operacionais nao devem ir para o GitHub)
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+backup/
+
+# Configuracoes locais e segredos
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# IDE / sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs e temporarios
+*.log

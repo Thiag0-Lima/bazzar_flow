@@ -1,0 +1,213 @@
+================================================================================
+  BAZZAR FLOW – GUIA DE ATUALIZAÇÃO NO WINDOWS SERVER
+  Bazzar Gráfica Expressa
+================================================================================
+
+Use este documento sempre que for publicar uma nova versão do sistema
+no servidor da loja.
+
+
+--------------------------------------------------------------------------------
+1. ANTES DE COMEÇAR (PC DE DESENVOLVIMENTO)
+--------------------------------------------------------------------------------
+
+1. Teste tudo localmente:
+   - Login
+   - Kanban (movimentação por perfil)
+   - Balcão (notificar + retirada)
+   - Histórico (horários corretos)
+   - Admin (usuários, perfil, excluídos)
+   - Relógio no menu
+
+2. Anote o que mudou (arquivos alterados).
+
+3. Comandos locais de teste:
+
+   cd C:\Users\SEU_USUARIO\Desktop\bazzar-flow
+   .\venv\Scripts\Activate.ps1
+   cd backend
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+   Acesse: http://localhost:8000
+   Use CTRL+F5 no navegador após mudanças de frontend.
+
+
+--------------------------------------------------------------------------------
+2. PARAR O SERVIÇO NO WINDOWS SERVER
+--------------------------------------------------------------------------------
+
+Abra o PowerShell como Administrador no servidor:
+
+   cd C:\nssm-2.24\nssm-2.24\win64
+   .\nssm.exe stop BazzarFlow
+   .\nssm.exe status BazzarFlow
+
+Aguarde Status = SERVICE_STOPPED.
+
+
+--------------------------------------------------------------------------------
+3. BACKUP (SEMPRE FAÇA)
+--------------------------------------------------------------------------------
+
+   copy "C:\Users\Administrator\Desktop\bazzar-flow\backend\bazzar_flow.db" "C:\Users\Administrator\Desktop\bazzar-flow\backup_bazzar_flow_%DATE%.db"
+
+Se a pasta de backup não existir:
+
+   mkdir "C:\Users\Administrator\Desktop\bazzar-flow\backups"
+   copy "C:\Users\Administrator\Desktop\bazzar-flow\backend\bazzar_flow.db" "C:\Users\Administrator\Desktop\bazzar-flow\backups\bazzar_flow_backup.db"
+
+
+--------------------------------------------------------------------------------
+4. COPIAR OS ARQUIVOS ATUALIZADOS
+--------------------------------------------------------------------------------
+
+Do PC de desenvolvimento para o servidor, copie:
+
+   C:\Users\Administrator\Desktop\bazzar-flow\backend\app\     (código Python)
+   C:\Users\Administrator\Desktop\bazzar-flow\frontend\        (HTML, CSS, JS)
+   C:\Users\Administrator\Desktop\bazzar-flow\backend\requirements.txt
+
+NÃO copie:
+   - a pasta venv\ do seu PC
+   - o arquivo bazzar_flow.db  (a menos que queira substituir os dados da loja)
+
+Caminho do projeto no servidor:
+   C:\Users\Administrator\Desktop\bazzar-flow
+
+
+--------------------------------------------------------------------------------
+5. BANCO DE DADOS – ESCOLHA UMA OPÇÃO
+--------------------------------------------------------------------------------
+
+OPÇÃO A – Manter os dados da loja (pedidos e usuários atuais)
+   - NÃO apague o bazzar_flow.db
+   - Só use se a atualização NÃO mudou a estrutura das tabelas
+     (novas colunas no models.py exigem migração ou banco novo)
+
+OPÇÃO B – Zerar o banco (recomendado em implantação / testes)
+   del "C:\Users\Administrator\Desktop\bazzar-flow\backend\bazzar_flow.db"
+
+   Na próxima subida o sistema recria o banco e os usuários padrão:
+   admin      / admin123
+   atendente  / 123
+   criacao    / 123
+   operador   / 123
+
+
+--------------------------------------------------------------------------------
+6. DEPENDÊNCIAS PYTHON (quando houver pacote novo)
+--------------------------------------------------------------------------------
+
+   cd C:\Users\Administrator\Desktop\bazzar-flow
+   .\venv\Scripts\Activate.ps1
+   cd backend
+   pip install -r requirements.txt
+   pip install "bcrypt==4.0.1"
+   pip install tzdata
+
+
+--------------------------------------------------------------------------------
+7. TESTE MANUAL (RECOMENDADO)
+--------------------------------------------------------------------------------
+
+   cd C:\Users\Administrator\Desktop\bazzar-flow
+   .\venv\Scripts\Activate.ps1
+   cd backend
+   uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+No servidor abra: http://localhost:8000
+
+Se a tela de login aparecer e o sistema responder, pare com CTRL+C.
+
+
+--------------------------------------------------------------------------------
+8. SUBIR O SERVIÇO NOVAMENTE
+--------------------------------------------------------------------------------
+
+   cd C:\nssm-2.24\nssm-2.24\win64
+   .\nssm.exe start BazzarFlow
+   .\nssm.exe status BazzarFlow
+
+Deve aparecer: SERVICE_RUNNING
+
+
+--------------------------------------------------------------------------------
+9. NOS COMPUTADORES DA LOJA
+--------------------------------------------------------------------------------
+
+1. Acesse: http://IP_DO_SERVIDOR:8000
+2. Pressione CTRL+F5 (limpa cache de JS/CSS antigo)
+3. Faça login e valide as funções principais
+
+
+--------------------------------------------------------------------------------
+10. COMANDOS ÚTEIS DO SERVIÇO
+--------------------------------------------------------------------------------
+
+   cd C:\nssm-2.24\nssm-2.24\win64
+
+   .\nssm.exe status BazzarFlow     # ver status
+   .\nssm.exe stop BazzarFlow       # parar
+   .\nssm.exe start BazzarFlow      # iniciar
+   .\nssm.exe restart BazzarFlow    # reiniciar
+
+Garantir inicialização automática após reinício/queda de energia:
+
+   Set-Service -Name BazzarFlow -StartupType Automatic
+   Get-Service BazzarFlow | Format-List Name, Status, StartType
+
+
+--------------------------------------------------------------------------------
+11. CHECKLIST RÁPIDO PÓS-ATUALIZAÇÃO
+--------------------------------------------------------------------------------
+
+   [ ] Serviço SERVICE_RUNNING
+   [ ] Login ok
+   [ ] Relógio no menu (horário de Brasília)
+   [ ] Kanban carrega e move cards
+   [ ] Balcão: notificar + registrar retirada (horário correto)
+   [ ] Histórico de entregas
+   [ ] Admin: usuários, perfil, status ativo/inativo
+   [ ] Admin: pedidos excluídos / restaurar
+   [ ] Outros PCs acessam pelo IP (CTRL+F5)
+
+
+--------------------------------------------------------------------------------
+12. SE ALGO DER ERRADO
+--------------------------------------------------------------------------------
+
+1. Pare o serviço:
+   .\nssm.exe stop BazzarFlow
+
+2. Restaure o backup do banco (se necessário):
+   copy "C:\Users\Administrator\Desktop\bazzar-flow\backups\bazzar_flow_backup.db" "C:\Users\Administrator\Desktop\bazzar-flow\backend\bazzar_flow.db"
+
+3. Suba de novo e teste com uvicorn manual para ver o erro no terminal.
+
+4. Confira o firewall (porta 8000) e o IP do servidor (ipconfig).
+
+
+--------------------------------------------------------------------------------
+13. ESTRUTURA IMPORTANTE
+--------------------------------------------------------------------------------
+
+Projeto no servidor:
+   C:\Users\Administrator\Desktop\bazzar-flow\
+   ├── backend\
+   │   ├── app\
+   │   ├── bazzar_flow.db          ← dados (não versionar / backupar sempre)
+   │   └── requirements.txt
+   ├── frontend\
+   └── venv\                       ← ambiente Python do SERVIDOR (não sobrescrever)
+
+Serviço Windows (NSSM):
+   Nome: BazzarFlow
+   Path: ...\venv\Scripts\uvicorn.exe
+   Startup directory: ...\backend
+   Arguments: app.main:app --host 0.0.0.0 --port 8000
+
+
+================================================================================
+Fim do guia – Bazzar Flow
+================================================================================
+```

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balcão – Bazzar Flow</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">Bazzar Flow</div>
+      <div class="user-info">Olá, <strong id="userName"></strong></div>
+    </div>
+
+    <div class="header-clock" id="headerClock">—</div>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="/kanban.html">Kanban</a>
+      <a href="/balcao.html" class="active">Balcão / Retirada</a>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <div class="toolbar">
+      <input type="search" id="searchInput" placeholder="Buscar por nº pedido, cliente ou CPF/CNPJ..." />
+      <button class="btn btn-outline" onclick="loadBalcao()">Atualizar</button>
+    </div>
+
+    <div id="balcaoList" class="balcao-grid">
+      <!-- cards gerados via JS -->
+    </div>
+  </main>
+
+  <!-- Modal Entrega -->
+  <div class="modal-overlay" id="modalDeliver">
+    <div class="modal">
+      <h2>Registrar Retirada</h2>
+      <form id="formDeliver">
+        <input type="hidden" id="deliverOrderId" />
+        <div class="form-group">
+          <label>Nome / Documento de quem retirou</label>
+          <input type="text" id="deliveredTo" required placeholder="Ex: João Silva – CPF 123.456.789-00" />
+        </div>
+        <div class="form-group">
+          <label>Data e Hora da Retirada</label>
+          <input type="datetime-local" id="deliveredAt" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalDeliver')">Cancelar</button>
+          <button type="submit" class="btn btn-success">Confirmar Entrega</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Modal Histórico de Movimentações -->
+<div class="modal-overlay" id="modalLogs">
+  <div class="modal" style="max-width:520px">
+    <h2 id="logsTitle">Histórico da OS</h2>
+    <div id="logsContent" style="max-height:400px;overflow-y:auto;margin:1rem 0">
+      Carregando...
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modalLogs')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/websocket.js"></script>
+  <script src="/js/balcao.js"></script>
+  <script src="/js/nav.js"></script>
+  
+</body>
+</html>

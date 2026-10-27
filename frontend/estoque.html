@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estoque – Bazzar Flow</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .tabs { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .tab { padding:.5rem 1rem; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-weight:600; }
+    .tab.active { background:#1e40af; color:#fff; border-color:#1e40af; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; }
+    th, td { padding:.75rem 1rem; border-bottom:1px solid #e2e8f0; text-align:left; font-size:.9rem; }
+    th { background:#f8fafc; font-size:.75rem; text-transform:uppercase; color:#64748b; }
+
+    .stock-zerado  { background: #fee2e2 !important; }
+    .stock-urgente { background: #fef2f2 !important; }
+    .stock-baixo   { background: #fff7ed !important; }
+    .stock-atencao { background: #fefce8 !important; }
+    .stock-ok      { background: #f0fdf4 !important; }
+
+    .badge-zerado  { background:#7f1d1d; color:#fff; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+    .badge-urgente { background:#dc2626; color:#fff; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+    .badge-baixo   { background:#ea580c; color:#fff; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+    .badge-atencao { background:#ca8a04; color:#fff; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+    .badge-ok      { background:#16a34a; color:#fff; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">Bazzar Flow</div>
+      <div class="user-info">Olá, <strong id="userName"></strong></div>
+    </div>
+    <div class="header-clock" id="headerClock">—</div>
+    <nav class="nav-links" id="navLinks"></nav>
+  </header>
+
+  <main class="page-content">
+    <h2 style="margin-bottom:1rem">Controle de Estoque</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="itens">Itens</button>
+      <button class="tab" data-tab="solicitar">Solicitar retirada</button>
+      <button class="tab" data-tab="solicitacoes">Solicitações</button>
+      <button class="tab" data-tab="movimentos" id="tabMov" style="display:none">Movimentos</button>
+      <button class="tab" data-tab="cadastro" id="tabCad" style="display:none">Cadastro</button>
+      <button class="btn btn-outline" type="button" onclick="exportEstoqueExcel()">Exportar Excel</button>
+    <button class="btn btn-outline" type="button" onclick="exportEstoquePDF()">Exportar PDF</button>
+    </div>
+
+    <!-- ITENS -->
+    <div class="panel active" id="panel-itens">
+      <div class="toolbar" style="margin-bottom:1rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:end">
+        <div>
+            <label style="font-size:.8rem">Busca</label><br/>
+            <input type="search" id="searchItem" placeholder="Buscar item..." />
+        </div>
+        <div>
+            <label style="font-size:.8rem">Categoria</label><br/>
+            <select id="filterCategoria" style="padding:.55rem .9rem;border-radius:8px;border:1px solid #cbd5e1">
+            <option value="">Todas</option>
+            </select>
+        </div>
+        <button class="btn btn-outline" onclick="loadItems()">Filtrar</button>
+        <button class="btn btn-outline" onclick="limparFiltrosItens()">Limpar</button>
+        </div>
+    <div id="itemsTable">Carregando...</div>
+    </div>
+
+    <!-- SOLICITAR -->
+    <div class="panel" id="panel-solicitar">
+      <div class="card-form" style="max-width:420px;background:#fff;padding:1.5rem;border-radius:12px">
+        <h3 style="margin-bottom:1rem">Nova solicitação de retirada</h3>
+        <form id="formRequest">
+          <div class="form-group">
+            <label>Item</label>
+            <select id="reqItem" required style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1"></select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade</label>
+            <input type="number" id="reqQty" min="0.01" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Motivo</label>
+            <textarea id="reqMotivo" rows="3" required style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1"></textarea>
+          </div>
+          <button type="submit" class="btn">Enviar solicitação</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SOLICITAÇÕES -->
+    <div class="panel" id="panel-solicitacoes">
+      <div id="requestsTable">Carregando...</div>
+    </div>
+
+    <!-- MOVIMENTOS -->
+    <div class="panel" id="panel-movimentos">
+      <div id="movementsTable">Carregando...</div>
+    </div>
+
+    <!-- CADASTRO (admin/estoque) -->
+    <div class="panel" id="panel-cadastro">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="card-form" style="background:#fff;padding:1.25rem;border-radius:12px">
+          <h3>Nova categoria</h3>
+          <form id="formCat">
+            <div class="form-group"><input type="text" id="catNome" placeholder="Nome da categoria" required /></div>
+            <button class="btn" type="submit">Criar categoria</button>
+          </form>
+          <div id="catList" style="margin-top:1rem"></div>
+        </div>
+        <div class="card-form" style="background:#fff;padding:1.25rem;border-radius:12px">
+          <h3>Novo item</h3>
+          <form id="formItem">
+            <div class="form-group">
+              <label>Categoria</label>
+              <select id="itemCat" required style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1"></select>
+            </div>
+            <div class="form-group"><label>Nome</label><input type="text" id="itemNome" required /></div>
+            <div class="form-group"><label>SKU</label><input type="text" id="itemSku" /></div>
+            <div class="form-group"><label>Unidade</label><input type="text" id="itemUn" value="un" required /></div>
+            <div class="form-group"><label>Qtd inicial</label><input type="number" id="itemQtd" value="0" step="any" /></div>
+            <div class="form-group"><label>Mínimo</label><input type="number" id="itemMin" value="0" step="any" /></div>
+            <button class="btn" type="submit">Cadastrar item</button>
+          </form>
+        </div>
+      </div>
+
+      <h3 style="margin:1.5rem 0 .75rem">Ajuste rápido de estoque</h3>
+      <div class="card-form" style="background:#fff;padding:1.25rem;border-radius:12px;max-width:480px">
+        <form id="formAdjust">
+          <div class="form-group">
+            <label>Item</label>
+            <select id="adjItem" required style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1"></select>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="adjTipo" style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1">
+              <option value="entrada">Entrada</option>
+              <option value="saida">Saída</option>
+              <option value="inventario">Inventário (definir quantidade final)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Quantidade</label><input type="number" id="adjQtd" min="0" step="any" required /></div>
+          <div class="form-group"><label>Motivo</label><input type="text" id="adjMotivo" required /></div>
+          <button class="btn" type="submit">Aplicar ajuste</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modalEditItem">
+  <div class="modal">
+    <h2>Editar item</h2>
+    <form id="formEditItem">
+      <input type="hidden" id="editItemId" />
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="editItemCat" required style="width:100%;padding:.7rem;border-radius:8px;border:1px solid #cbd5e1"></select>
+      </div>
+      <div class="form-group"><label>Nome</label><input type="text" id="editItemNome" required /></div>
+      <div class="form-group"><label>SKU</label><input type="text" id="editItemSku" /></div>
+      <div class="form-group"><label>Unidade</label><input type="text" id="editItemUn" required /></div>
+      <div class="form-group"><label>Mínimo</label><input type="number" id="editItemMin" step="any" /></div>
+      <div class="form-group"><label>Observação</label><input type="text" id="editItemObs" /></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalEditItem')">Cancelar</button>
+        <button type="submit" class="btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/estoque.js"></script>
+</body>
+</html>

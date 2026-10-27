@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban – Bazzar Flow</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">Bazzar Flow</div>
+      <div class="user-info">Olá, <strong id="userName"></strong></div>
+    </div>
+
+    <div class="header-clock" id="headerClock">—</div>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="/kanban.html" class="active">Kanban</a>
+      <a href="/balcao.html" id="linkBalcao" style="display:none">Balcão</a>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+    </nav>
+  </header>
+
+  <main class="page-content">
+  <!-- toolbar -->
+  <div class="toolbar">
+    <input type="search" id="searchInput" placeholder="Buscar por nº pedido, cliente..." />
+    <button type="button" class="btn" id="btnNewOrder">+ Nova OS</button>
+    <button  type="button" class="btn btn-outline" onclick="loadKanban()">Atualizar</button>
+    <button type="button" class="btn btn-outline" id="btnToggleLayout" onclick="toggleKanbanLayout()">
+      Visualização: Vertical
+    </button>
+  </div>
+
+  <!-- AQUI: o board do Kanban -->
+  <div id="kanbanBoard" class="kanban"></div>
+  </main>
+
+  <!-- Modal Nova OS -->
+  <div class="modal-overlay" id="modalNew">
+    <div class="modal">
+      <h2>Nova Ordem de Serviço</h2>
+      <form id="formNewOrder">
+        <div class="form-group">
+          <label>Número do Pedido</label>
+          <input type="text" name="numero_pedido" required />
+        </div>
+        <div class="form-group">
+          <label>Nome do Cliente</label>
+          <input type="text" name="nome_cliente" required />
+        </div>
+        <div class="form-group">
+          <label>CPF / CNPJ</label>
+          <input type="text" name="cpf_cnpj" required />
+        </div>
+        <div class="form-group">
+          <label>Prazo de produção *</label>
+          <input type="datetime-local" name="prazo" id="inputPrazo" required />
+        </div>
+        <div class="form-group">
+          <label>Descrição dos Materiais</label>
+          <textarea name="descricao" rows="3" required style="width:100%;padding:.7rem;border:1px solid #cbd5e1;border-radius:8px;resize:vertical"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalNew')">Cancelar</button>
+          <button type="submit" class="btn">Criar OS</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Modal Histórico de Movimentações -->
+<div class="modal-overlay" id="modalLogs">
+<div class="modal" style="max-width:520px">
+    <h2 id="logsTitle">Histórico da OS</h2>
+    <div id="logsContent" style="max-height:400px;overflow-y:auto;margin:1rem 0">
+    Carregando...
+    </div>
+    <div class="modal-actions">
+    <button type="button" class="btn btn-outline" onclick="closeModal('modalLogs')">Fechar</button>
+    </div>
+</div>
+</div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/websocket.js"></script>
+  <script src="/js/kanban.js"></script>
+  <script src="/js/nav.js"></script>
+  
+</body>
+</html>

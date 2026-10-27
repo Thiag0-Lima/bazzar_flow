@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Bazzar Flow</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .admin-grid { grid-template-columns: 1fr; }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    th, td {
+      padding: .8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: .9rem;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+      font-size: .8rem;
+      text-transform: uppercase;
+    }
+    .badge-role {
+      display: inline-block;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .role-admin { background: #ede9fe; color: #5b21b6; }
+    .role-atendente { background: #dbeafe; color: #1e40af; }
+    .role-operador { background: #dcfce7; color: #166534; }
+    .role-criacao { background: #dcfce7; color: #e712a0; }
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .card-form {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">Bazzar Flow</div>
+      <div class="user-info">Olá, <strong id="userName"></strong></div>
+    </div>
+
+    <div class="header-clock" id="headerClock">—</div>
+
+    <nav class="nav-links" id="navLinks"></nav>
+  </header>
+
+  <main class="page-content">
+    <h2 style="margin-bottom:1.25rem">Administração de Usuários</h2>
+
+    <div class="admin-grid">
+      <div>
+        <div id="usersTable">Carregando...</div>
+        <h2 style="margin:2rem 0 1rem">Pedidos excluídos</h2>
+      <div id="deletedTable">Carregando...</div>
+      </div>
+      
+      <div class="card-form">
+        <h3 style="margin-bottom:1rem">Novo Usuário</h3>
+        <form id="formNewUser">
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" name="full_name" required />
+          </div>
+          <div class="form-group">
+            <label>Usuário (login)</label>
+            <input type="text" name="username" required />
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" name="password" required minlength="3" />
+          </div>
+          <div class="form-group">
+            <label>Perfil</label>
+            <select name="role" required style="width:100%;padding:.7rem;border:1px solid #cbd5e1;border-radius:8px">
+                <option value="criacao">Criação</option>
+                <option value="operador">Operador de Produção</option>
+                <option value="atendente">Atendente de Balcão</option>
+                <option value="estoque">Estoque</option>
+                <option value="admin">Administrador</option>
+        </select>
+          </div>
+          <button type="submit" class="btn btn-block">Criar Usuário</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+<!-- Modal Alterar Senha -->
+<div class="modal-overlay" id="modalResetPassword">
+  <div class="modal">
+    <h2>Alterar senha</h2>
+    <p style="margin-bottom:1rem;color:#64748b">
+      Usuário: <strong id="resetUsername"></strong>
+    </p>
+    <form id="formResetPassword">
+      <input type="hidden" id="resetUserId" />
+      <div class="form-group">
+        <label>Nova senha</label>
+        <input type="password" id="newPassword" required minlength="3" />
+      </div>
+      <div class="form-group">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="confirmPassword" required minlength="3" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalResetPassword')">Cancelar</button>
+        <button type="submit" class="btn btn-warning">Salvar nova senha</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/admin.js"></script>
+  
+</body>
+</html>
